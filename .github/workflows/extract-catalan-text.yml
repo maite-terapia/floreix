@@ -1,0 +1,64 @@
+name: extract-catalan-text
+
+on:
+  push:
+    paths:
+      - '.github/workflows/extract-catalan-text.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+      - name: Extract visible Catalan content
+        run: |
+          cat > extract.mjs <<'EOF'
+          import { chromium } from 'playwright';
+          import fs from 'fs';
+          import path from 'path';
+          const browser=await chromium.launch({headless:true});
+          const pages=[
+            ['home','https://floreix.com/'],
+            ['psicoterapia','https://floreix.com/psicoterapia/'],
+            ['terapia-a-la-natura','https://floreix.com/terapia-a-la-natura/'],
+            ['about','https://floreix.com/about/'],
+            ['metodologia','https://floreix.com/metodologia/'],
+            ['contact','https://floreix.com/contact/'],
+            ['privacy-policy','https://floreix.com/privacy-policy/']
+          ];
+          fs.mkdirSync('reference-text',{recursive:true});
+          for(const [name,url] of pages){
+            const page=await browser.newPage({viewport:{width:1440,height:1000}});
+            await page.goto(url,{waitUntil:'networkidle',timeout:120000});
+            const text=await page.locator('body').innerText();
+            fs.writeFileSync(path.join('reference-text',`${name}.txt`),text.replace(/\n{3,}/g,'\n\n').trim()+'\n');
+            await page.close();
+          }
+          await browser.close();
+          EOF
+          node extract.mjs
+      - name: Commit reference text
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reference-text
+          if git diff --cached --quiet; then
+            echo "No text changes"
+          else
+            git commit -m "Extract current Catalan source text"
+            git pull --rebase origin main
+            git push origin main
+          fi
