@@ -1,4 +1,4 @@
-name: capture-reference
+name: sync-floreix-reference
 
 on:
   push:
@@ -6,13 +6,15 @@ on:
       - '.github/workflows/capture-reference.yml'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  capture:
+  sync:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -21,50 +23,82 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install playwright@1.55.0 >/dev/null 2>&1
           npx playwright install --with-deps chromium >/dev/null 2>&1
-      - name: Capture reference pages
+      - name: Mirror Catalan pages exactly
         run: |
-          cat > capture.mjs <<'EOF'
+          cat > mirror.mjs <<'EOF'
           import { chromium } from 'playwright';
           import fs from 'fs';
+          import path from 'path';
+
           const browser = await chromium.launch({headless:true});
-          fs.mkdirSync('reference', {recursive:true});
-          const targets = [
-            ['home','https://floreix.com/'],
-            ['psicoterapia','https://floreix.com/psicoterapia/'],
-            ['terapia-a-la-natura','https://floreix.com/terapia-a-la-natura/'],
-            ['about','https://floreix.com/about/'],
-            ['metodologia','https://floreix.com/metodologia/'],
-            ['contact','https://floreix.com/contact/'],
-            ['privacy-policy','https://floreix.com/privacy-policy/']
+          const cloneBase = 'https://maite-terapia.github.io/floreix/';
+          const pages = [
+            {name:'home', source:'https://floreix.com/', out:'index.html'},
+            {name:'psicoterapia', source:'https://floreix.com/psicoterapia/', out:'psicoterapia/index.html'},
+            {name:'terapia-a-la-natura', source:'https://floreix.com/terapia-a-la-natura/', out:'terapia-a-la-natura/index.html'},
+            {name:'about', source:'https://floreix.com/about/', out:'about/index.html'},
+            {name:'metodologia', source:'https://floreix.com/metodologia/', out:'metodologia/index.html'},
+            {name:'contact', source:'https://floreix.com/contact/', out:'contact/index.html'},
+            {name:'privacy-policy', source:'https://floreix.com/privacy-policy/', out:'privacy-policy/index.html'}
           ];
-          const report = {};
-          for (const [name,url] of targets) {
+
+          const routeMap = new Map([
+            ['https://floreix.com/', cloneBase],
+            ['http://floreix.com/', cloneBase],
+            ['https://floreix.com/psicoterapia/', cloneBase+'psicoterapia/'],
+            ['https://floreix.com/terapia-a-la-natura/', cloneBase+'terapia-a-la-natura/'],
+            ['https://floreix.com/about/', cloneBase+'about/'],
+            ['http://floreix.com/about/', cloneBase+'about/'],
+            ['https://floreix.com/metodologia/', cloneBase+'metodologia/'],
+            ['https://floreix.com/contact/', cloneBase+'contact/'],
+            ['https://floreix.com/privacy-policy/', cloneBase+'privacy-policy/'],
+            ['https://floreix.com/es/elementor-1816/', cloneBase+'es/'],
+            ['https://floreix.com/es/psicoterapia-2/', cloneBase+'es/psicoterapia/'],
+            ['https://floreix.com/es/terapia-en-la-naturaleza/', cloneBase+'es/terapia-en-la-naturaleza/'],
+            ['https://floreix.com/es/sobre-nosotros/', cloneBase+'es/sobre-nosotros/'],
+            ['https://floreix.com/es/metodologia-2/', cloneBase+'es/metodologia/'],
+            ['https://floreix.com/es/contacto/', cloneBase+'es/contacto/']
+          ]);
+
+          for (const target of pages) {
             const page = await browser.newPage({viewport:{width:1440,height:1000}});
-            await page.goto(url,{waitUntil:'networkidle',timeout:120000});
-            await page.screenshot({path:`reference/${name}-desktop.png`,fullPage:true});
-            fs.writeFileSync(`reference/${name}.html`, await page.content());
-            report[name] = await page.evaluate(() => ({
-              title: document.title,
-              url: location.href,
-              bodyFont:getComputedStyle(document.body).fontFamily,
-              bodyColor:getComputedStyle(document.body).color,
-              bodyBackground:getComputedStyle(document.body).backgroundColor,
-              h1:[...document.querySelectorAll('h1')].map(el=>({text:el.textContent.trim(),font:getComputedStyle(el).fontFamily,size:getComputedStyle(el).fontSize,weight:getComputedStyle(el).fontWeight,lineHeight:getComputedStyle(el).lineHeight,color:getComputedStyle(el).color,letterSpacing:getComputedStyle(el).letterSpacing,rect:el.getBoundingClientRect().toJSON()})),
-              images:[...document.images].map(img=>({src:img.currentSrc||img.src,alt:img.alt,width:img.getBoundingClientRect().width,height:img.getBoundingClientRect().height})).filter(x=>x.src && !x.src.startsWith('data:'))
-            }));
+            await page.goto(target.source,{waitUntil:'networkidle',timeout:120000});
+            await page.evaluate(({entries, cloneBase, targetSource}) => {
+              const map = new Map(entries);
+              document.querySelectorAll('a[href]').forEach(a => {
+                const href = a.href;
+                if (map.has(href)) a.setAttribute('href', map.get(href));
+              });
+              document.querySelectorAll('link[rel="canonical"],link[rel="alternate"]').forEach(l => {
+                const href = l.href;
+                if (map.has(href)) l.setAttribute('href', map.get(href));
+              });
+              document.querySelectorAll('meta[property="og:url"]').forEach(m => {
+                const u = m.getAttribute('content');
+                if (map.has(u)) m.setAttribute('content', map.get(u));
+              });
+              const marker=document.createElement('meta');
+              marker.name='generator';
+              marker.content='Static visual replica of floreix.com';
+              document.head.appendChild(marker);
+            }, {entries:[...routeMap.entries()], cloneBase, targetSource:target.source});
+            const html = await page.content();
+            fs.mkdirSync(path.dirname(target.out),{recursive:true});
+            fs.writeFileSync(target.out,html);
+            console.log(`Mirrored ${target.source} -> ${target.out} (${html.length} chars)`);
             await page.close();
           }
-          for (const [name,url] of [['home','https://floreix.com/'],['about','https://floreix.com/about/']]) {
-            const page = await browser.newPage({viewport:{width:390,height:844}});
-            await page.goto(url,{waitUntil:'networkidle',timeout:120000});
-            await page.screenshot({path:`reference/${name}-mobile.png`,fullPage:true});
-            await page.close();
-          }
-          fs.writeFileSync('reference/report.json', JSON.stringify(report,null,2));
           await browser.close();
           EOF
-          node capture.mjs
-      - uses: actions/upload-artifact@v4
-        with:
-          name: floreix-reference-all
-          path: reference/
+          node mirror.mjs
+      - name: Commit mirrored pages
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html psicoterapia terapia-a-la-natura about metodologia contact privacy-policy
+          if git diff --cached --quiet; then
+            echo "No page changes to commit"
+          else
+            git commit -m "Mirror live Floreix design exactly"
+            git push origin main
+          fi
