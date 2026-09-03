@@ -1,0 +1,54 @@
+name: verify-visual
+
+on:
+  push:
+    paths:
+      - '.github/workflows/verify-visual.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+      - name: Capture original and clone
+        run: |
+          cat > verify.mjs <<'EOF'
+          import { chromium } from 'playwright';
+          import fs from 'fs';
+          fs.mkdirSync('shots',{recursive:true});
+          const browser=await chromium.launch({headless:true});
+          const targets=[
+            ['original-home','https://floreix.com/'],
+            ['clone-home','https://maite-terapia.github.io/floreix/'],
+            ['original-about','https://floreix.com/about/'],
+            ['clone-about','https://maite-terapia.github.io/floreix/about/'],
+            ['clone-es','https://maite-terapia.github.io/floreix/es/']
+          ];
+          for (const [name,url] of targets) {
+            for (const [mode,w,h] of [['desktop',1440,1000],['mobile',390,844]]) {
+              const page=await browser.newPage({viewport:{width:w,height:h}});
+              await page.goto(url,{waitUntil:'networkidle',timeout:120000});
+              await page.evaluate(async()=>{ if(document.fonts?.ready) await document.fonts.ready; });
+              await page.waitForTimeout(1500);
+              await page.screenshot({path:`shots/${name}-${mode}.png`,fullPage:true});
+              fs.appendFileSync('shots/report.txt',`${name} ${mode} ${await page.title()} ${page.url()}\n`);
+              await page.close();
+            }
+          }
+          await browser.close();
+          EOF
+          node verify.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: visual-verification
+          path: shots/
