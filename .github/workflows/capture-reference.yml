@@ -1,0 +1,61 @@
+name: capture-reference
+
+on:
+  push:
+    paths:
+      - '.github/workflows/capture-reference.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+      - name: Capture reference pages
+        run: |
+          cat > capture.mjs <<'EOF'
+          import { chromium } from 'playwright';
+          import fs from 'fs';
+          const browser = await chromium.launch({headless:true});
+          fs.mkdirSync('reference', {recursive:true});
+          const targets = [
+            ['home','https://floreix.com/'],
+            ['about','https://floreix.com/about/']
+          ];
+          for (const [name,url] of targets) {
+            for (const [mode,width,height] of [['desktop',1440,1000],['mobile',390,844]]) {
+              const page = await browser.newPage({viewport:{width,height}});
+              await page.goto(url,{waitUntil:'networkidle',timeout:120000});
+              await page.screenshot({path:`reference/${name}-${mode}.png`,fullPage:true});
+              if (name === 'home' && mode === 'desktop') {
+                fs.writeFileSync('reference/home.html', await page.content());
+                const meta = await page.evaluate(() => ({
+                  bodyFont:getComputedStyle(document.body).fontFamily,
+                  bodyColor:getComputedStyle(document.body).color,
+                  bodyBackground:getComputedStyle(document.body).backgroundColor,
+                  viewport:{w:innerWidth,h:innerHeight},
+                  headings:[...document.querySelectorAll('h1,h2,h3,h4')].slice(0,20).map(el=>({tag:el.tagName,text:el.textContent.trim(),font:getComputedStyle(el).fontFamily,size:getComputedStyle(el).fontSize,weight:getComputedStyle(el).fontWeight,lineHeight:getComputedStyle(el).lineHeight,color:getComputedStyle(el).color,letterSpacing:getComputedStyle(el).letterSpacing,rect:el.getBoundingClientRect().toJSON()})),
+                  header:document.querySelector('header') ? (()=>{const e=document.querySelector('header'),s=getComputedStyle(e);return {rect:e.getBoundingClientRect().toJSON(),position:s.position,color:s.color,background:s.backgroundColor}})() : null
+                }));
+                fs.writeFileSync('reference/metrics.json', JSON.stringify(meta,null,2));
+              }
+              await page.close();
+            }
+          }
+          await browser.close();
+          EOF
+          node capture.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: floreix-reference
+          path: reference/
