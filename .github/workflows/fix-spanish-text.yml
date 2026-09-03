@@ -1,0 +1,174 @@
+name: fix-spanish-text
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-spanish-text.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Replace remaining Catalan visible copy in Spanish pages
+        run: |
+          cat > fix.mjs <<'EOF'
+          import fs from 'fs';
+
+          const common = new Map([
+            ['Vés al contingut','Ir al contenido'],
+            ['Inici','Inicio'],
+            ['Serveis','Servicios'],
+            ['Psicoteràpia','Psicoterapia'],
+            ['Teràpia a la natura i Mindfulness','Terapia en la naturaleza y Mindfulness'],
+            ['Sobre nosaltres','Sobre nosotros'],
+            ['Metodologia','Metodología'],
+            ['Contacte','Contacto'],
+            ['Termes i Condicions','Términos y condiciones'],
+            ['Cos i ment en unió','Cuerpo y mente en unión']
+          ]);
+
+          const perFile = {
+            'es/index.html': new Map([
+              ['Teràpia amb mirada sistèmica i arrelament natural','Terapia con mirada sistémica y arraigo natural'],
+              ['Teràpia Relacional Sistèmica  l  Mindfulness  l  Natura','Terapia Relacional Sistémica  l  Mindfulness  l  Naturaleza'],
+              ['Teràpia Relacional Sistèmica l Mindfulness l Natura','Terapia Relacional Sistémica l Mindfulness l Naturaleza'],
+              ['Un espai de comprensió','Un espacio de comprensión'],
+              ['La psicoteràpia ajuda a entendre el malestar dins del sistema de relacions en què vivim. El treball pot incloure la persona, la parella o la família per afavorir nous equilibris i maneres més saludables de relacionar-se.','La psicoterapia ayuda a entender el malestar dentro del sistema de relaciones en el que vivimos. El trabajo puede incluir a la persona, la pareja o la familia para favorecer nuevos equilibrios y formas más saludables de relacionarse.'],
+              ['Cultivar l’atenció conscient','Cultivar la atención consciente'],
+              ['A través del mindfulness aprenem a observar el que vivim amb calma i sense judici. Aquesta pràctica afavoreix la regulació emocional i una relació més amable amb un mateix i amb els altres.','A través del mindfulness aprendemos a observar lo que vivimos con calma y sin juicio. Esta práctica favorece la regulación emocional y una relación más amable con uno mismo y con los demás.'],
+              ['Teràpia a la natura','Terapia en la naturaleza'],
+              ['Reconnectar amb el ritme intern','Reconectar con el ritmo interno'],
+              ['Els entorns naturals ofereixen un espai privilegiat per aturar-se, escoltar-se i recuperar la calma. El contacte amb la natura facilita processos de consciència, introspecció i benestar emocional.','Los entornos naturales ofrecen un espacio privilegiado para detenerse, escucharse y recuperar la calma. El contacto con la naturaleza facilita procesos de conciencia, introspección y bienestar emocional.'],
+              ['Com a psicòloga, al llarg de la meva trajectòria professional he','Como psicóloga, a lo largo de mi trayectoria profesional he'],
+              ['acompanyat persones i organitzacions','acompañado a personas y organizaciones'],
+              ['en processos de creixement, canvis i transformació.','en procesos de crecimiento, cambios y transformación.'],
+              ['La formació contínua i l’experiència clínica han anat configurant una mirada sistèmica i integradora, que entén el malestar no com un fet aïllat, sinó dins del context vital i relacional de cada persona.','La formación continua y la experiencia clínica han ido configurando una mirada sistémica e integradora, que entiende el malestar no como un hecho aislado, sino dentro del contexto vital y relacional de cada persona.'],
+              ['Ofereixo un espai d’acompanyament empàtic, rigorós i genuí, on poder comprendre les emocions, revisar patrons relacionals i transitar moments de canvi amb més consciència.','Ofrezco un espacio de acompañamiento empático, riguroso y genuino, donde poder comprender las emociones, revisar patrones relacionales y transitar momentos de cambio con mayor conciencia.'],
+              ['treballem des d’una mirada sistèmica, propera i respectuosa, posant el focus en l’autoconeixement i el benestar emocional.','trabajamos desde una mirada sistémica, cercana y respetuosa, poniendo el foco en el autoconocimiento y el bienestar emocional.'],
+              ['Un lloc per reconnectar amb tu, amb els teus vincles i amb la natura.','Un lugar para reconectar contigo, con tus vínculos y con la naturaleza.'],
+              ['“Altament recomanat per a tothom que busqui una experiència terapèutica enriquidora i genuïna.”','“Altamente recomendado para todo aquel que busque una experiencia terapéutica enriquecedora y genuina.”'],
+              ['Vols més informació o reservar una primera sessió?','¿Quieres más información o reservar una primera sesión?']
+            ]),
+            'es/psicoterapia/index.html': new Map([
+              ['Teràpia amb una mirada sistèmica','Terapia con una mirada sistémica'],
+              ['Des de la perspectiva sistèmica, entenem que les persones formem part de sistemes de relació; família, parella, entorn. El malestar no s’explica només des de l’individu, sinó també des dels vincles i les dinàmiques que ens envolten. Per això, la intervenció pot adaptar-se a diferents formats:','Desde la perspectiva sistémica, entendemos que las personas formamos parte de sistemas de relación: familia, pareja y entorno. El malestar no se explica únicamente desde el individuo, sino también desde los vínculos y las dinámicas que nos rodean. Por ello, la intervención puede adaptarse a diferentes formatos:'],
+              ['Teràpia individual','Terapia individual'],
+              ['Un espai per cuidar el teu benestar emocional','Un espacio para cuidar tu bienestar emocional'],
+              ['Un lloc d’acollida i reflexió per comprendre les emocions, els patrons relacionals i els moments de crisi vital. Treballem l’autoconeixement, la regulació emocional i la manera com et relaciones amb els altres, sempre tenint present el sistema del qual formes part.','Un lugar de acogida y reflexión para comprender las emociones, los patrones relacionales y los momentos de crisis vital. Trabajamos el autoconocimiento, la regulación emocional y la forma en que te relacionas con los demás, teniendo siempre presente el sistema del que formas parte.'],
+              ['Teràpia de parella','Terapia de pareja'],
+              ['Revisar la relació per trobar noves maneres de connectar','Revisar la relación para encontrar nuevas formas de conectar'],
+              ['El vostre espai per revisar la comunicació, els conflictes i les expectatives dins la relació. L’objectiu és comprendre les dinàmiques que s’han establert, restaurar el diàleg i construir una relació més conscient i equilibrada..','Vuestro espacio para revisar la comunicación, los conflictos y las expectativas dentro de la relación. El objetivo es comprender las dinámicas que se han establecido, restaurar el diálogo y construir una relación más consciente y equilibrada.'],
+              ['Teràpia familiar','Terapia familiar'],
+              ['Comprendre el sistema familiar per recuperar l’equilibri','Comprender el sistema familiar para recuperar el equilibrio'],
+              ['Des d’una mirada sistèmica i en un ambient proper i acollidor, abordem les dificultats que afecten el sistema familiar: conflictes, etapes de canvi, adolescència o desajustos en els rols. Entenem que el malestar pren sentit dins les relacions. L’objectiu és enfortir els vincles familiars i construir noves maneres de relacionar-vos amb més consciència, respecte i benestar compartit.','Desde una mirada sistémica y en un ambiente cercano y acogedor, abordamos las dificultades que afectan al sistema familiar: conflictos, etapas de cambio, adolescencia o desajustes en los roles. Entendemos que el malestar cobra sentido dentro de las relaciones. El objetivo es fortalecer los vínculos familiares y construir nuevas formas de relacionaros con mayor conciencia, respeto y bienestar compartido.']
+            ]),
+            'es/terapia-en-la-naturaleza/index.html': new Map([
+              ['Teràpia a la natura','Terapia en la naturaleza'],
+              ['Teràpia Relacional Sistèmica  l  Natura  l  Mindfulness','Terapia Relacional Sistémica  l  Naturaleza  l  Mindfulness'],
+              ['Teràpia Relacional Sistèmica l Natura l Mindfulness','Terapia Relacional Sistémica l Naturaleza l Mindfulness'],
+              ['Sessió individual','Sesión individual'],
+              ['Proporcionar una atenció personalitzada amb un enfocament holístic, orientat a l’escolta del cos (Shapiro D, 2002) i la fusió amb la natura, com a teràpia per a promoure la salut mental (International Nature and Forest Therapy Alliance, INFTA).','Proporcionar una atención personalizada con un enfoque holístico, orientado a la escucha del cuerpo (Shapiro D, 2002) y a la conexión con la naturaleza, como terapia para promover la salud mental (International Nature and Forest Therapy Alliance, INFTA).'],
+              ['Sessió en grup','Sesión en grupo'],
+              ['Aprofitar la relaxació que proporciona un entorn natural obert per a cohesionar grups, generar empatia, reduir els prejudicis i fomentar la comunicació, l’entesa i acceptació vers la diversitat.','Aprovechar la relajación que proporciona un entorno natural abierto para cohesionar grupos, generar empatía, reducir los prejuicios y fomentar la comunicación, la comprensión y la aceptación de la diversidad.'],
+              ['Sessió per a nens','Sesión para niños'],
+              ['Mitjançant activitats lúdiques, fomentar la comunicació interpersonal, la identificació de les emocions i el maneig dels sentiments, per a crear un clima de respecte i cohesió.','Mediante actividades lúdicas, fomentar la comunicación interpersonal, la identificación de las emociones y el manejo de los sentimientos, para crear un clima de respeto y cohesión.'],
+              ['un moment per parar, respirar i observar','un momento para parar, respirar y observar'],
+              ['Oferim espais de','Ofrecemos espacios de'],
+              ['pràctica de mindfulness','práctica de mindfulness'],
+              ['orientats a cultivar l’atenció al moment present i afavorir el benestar emocional. Mitjançant exercicis senzills de respiració, consciència corporal i observació dels pensaments, el mindfulness ajuda a','orientados a cultivar la atención al momento presente y favorecer el bienestar emocional. Mediante ejercicios sencillos de respiración, conciencia corporal y observación de los pensamientos, el mindfulness ayuda a'],
+              ['reduir l’estrès, millorar la regulació emocional i desenvolupar una relació més conscient amb un mateix.','reducir el estrés, mejorar la regulación emocional y desarrollar una relación más consciente con uno mismo.'],
+              ['Aquestes sessions conviden a cultivar una presència plena que permeti no quedar atrapats en el flux constant de pensaments. T’acompanyo a través d’exercicis pràctics amb l’objectiu d’oferir eines que es puguin integrar en la vida quotidiana, afavorint una','Estas sesiones invitan a cultivar una presencia plena que permita no quedar atrapados en el flujo constante de pensamientos. Te acompaño a través de ejercicios prácticos con el objetivo de ofrecer herramientas que puedan integrarse en la vida cotidiana, favoreciendo una'],
+              ['major calma, claredat mental i equilibri personal.','mayor calma, claridad mental y equilibrio personal.'],
+              ['L’objectiu és que cada persona pugui connectar amb els seus propis recursos i cuidar la seva llavor interior, creant espais de silenci i consciència enmig del ritme del dia a dia.','El objetivo es que cada persona pueda conectar con sus propios recursos y cuidar su semilla interior, creando espacios de silencio y conciencia en medio del ritmo cotidiano.'],
+              ["Un canvi és possible, quan ets conscient d'allò que vols transformar.",'Un cambio es posible cuando eres consciente de aquello que quieres transformar.'],
+              ['Mitjançant la','Mediante la'],
+              ['teràpia a la natura','terapia en la naturaleza'],
+              [', es buscarà la connexió de cos i ment, cercant aprofundir en l’autoconeixement amb l’atenció plena o mindfulness. Es facilitarà el recolzament per',', se buscará la conexión entre cuerpo y mente, profundizando en el autoconocimiento mediante la atención plena o mindfulness. Se facilitará el acompañamiento para'],
+              ['afrontar els pensaments, emocions, sensacions físiques','afrontar los pensamientos, emociones y sensaciones físicas'],
+              [', comportaments o situacions que interfereixen en el funcionament quotidià. L’objectiu es',', comportamientos o situaciones que interfieren en el funcionamiento cotidiano. El objetivo es'],
+              ['reduir l’ansietat i millorar l’estat d’ànim','reducir la ansiedad y mejorar el estado de ánimo'],
+              [', augmentar la concentració i fomentar l’ús de la natura com a recurs terapèutic',', aumentar la concentración y fomentar el uso de la naturaleza como recurso terapéutico'],
+              ['Vols més informació o reservar una primera sessió?','¿Quieres más información o reservar una primera sesión?']
+            ]),
+            'es/sobre-nosotros/index.html': new Map([
+              ['Sóc psicòloga i, al llarg de la meva trajectòria professional, m’he dedicat a','Soy psicóloga y, a lo largo de mi trayectoria profesional, me he dedicado a'],
+              ['acompanyar persones i organitzacions','acompañar a personas y organizaciones'],
+              ['en els seus processos de creixement i transformació.','en sus procesos de crecimiento y transformación.'],
+              ['La formació contínua i el treball directe amb persones han anat de la mà, consolidant una mirada sistèmica i integradora.','La formación continua y el trabajo directo con personas han ido de la mano, consolidando una mirada sistémica e integradora.'],
+              ['Entenc cada procés dins el seu context vital i relacional,','Entiendo cada proceso dentro de su contexto vital y relacional,'],
+              ['oferint un acompanyament empàtic, rigorós i genuí,','ofreciendo un acompañamiento empático, riguroso y genuino,'],
+              ['inspirat també en la natura, la música i la pràctica de la presència.','inspirado también en la naturaleza, la música y la práctica de la presencia.'],
+              ['Missió','Misión'],
+              ['Aprofitar els beneficis de la natura sobre les persones, com a eina clau en els processos terapèutics.','Aprovechar los beneficios de la naturaleza sobre las personas como herramienta clave en los procesos terapéuticos.'],
+              ['Visió','Visión'],
+              ['Oferir suport psicològics amb els recursos dels boscos de proximitat, tant per a infants com a adults, de manera individual o grupal, per aprofundir en l’autoconeixement; en la unió cos i ment.','Ofrecer apoyo psicológico con los recursos de los bosques de proximidad, tanto a niños como a adultos, de forma individual o grupal, para profundizar en el autoconocimiento y en la unión entre cuerpo y mente.'],
+              ['Valors','Valores'],
+              ['Integritat, honestedat i il·lusió','Integridad, honestidad e ilusión'],
+              ['Per què floreix?','¿Por qué floreix?'],
+              ['La passió per les flors, com a manifestació de fragilitat, elegància i subtilesa de les seves formes. Les flors com expressió de bellesa, d’arribar a la plenitud, del brollar de l’energia més pura. Unes flors que també són l’inici d’un cicle vital, del que en un futur serà la seva llavor.','La pasión por las flores, como manifestación de fragilidad, elegancia y sutileza de sus formas. Las flores como expresión de belleza, de alcanzar la plenitud, del brotar de la energía más pura. Unas flores que también son el inicio de un ciclo vital, de lo que en un futuro será su semilla.'],
+              ['La llavor que cadascun de nosaltres portem dins i, de vegades, les diferents capes que anem afegint al llarg de la vida, ens la deixen oculta.','La semilla que cada uno de nosotros lleva dentro y, a veces, las diferentes capas que vamos añadiendo a lo largo de la vida, la dejan oculta.'],
+              ['Col·laboradors','Colaboradores'],
+              ['La col.laboració de l’especialista en mediació i pedagoga Gemma Garcia, facilita un tracte més personalitzat en les sessions grupals.','La colaboración de la especialista en mediación y pedagoga Gemma Garcia facilita un trato más personalizado en las sesiones grupales.'],
+              ['La seva aportació harmònica, ajuda en les diferents sinèrgies que es generen dins del grup, aconseguint així un creixement individual alhora que grupal.','Su aportación armónica ayuda en las diferentes sinergias que se generan dentro del grupo, consiguiendo así un crecimiento individual y grupal.']
+            ]),
+            'es/metodologia/index.html': new Map([
+              ['Després del','Después del'],
+              ['primer contacte online','primer contacto online'],
+              ['i haver pogut fer l’anamnesi, la segona visita tindrà lloc en un espai natural, on poder sentir el cos en moviment.','y haber podido realizar la anamnesis, la segunda visita tendrá lugar en un espacio natural, donde poder sentir el cuerpo en movimiento.'],
+              ['S’establirà un punt de trobada, ben connectat amb transport públic o privat,','Se establecerá un punto de encuentro, bien conectado mediante transporte público o privado,'],
+              ['facilitant-te la ubicació via WhatsApp','facilitándote la ubicación por WhatsApp'],
+              ['El Parc de la Serra de Collserola és el recurs natural més proper que permetrà sortir de la rigidesa de les rutines diàries.','El Parc de la Serra de Collserola es el recurso natural más cercano que permitirá salir de la rigidez de las rutinas diarias.'],
+              ['Ens endinsarem mitjançant l’obertura dels sentits en l’entorn natural, guiant cap a la consciència plena, propiciant la connexió de cos i ment. El balanceig dels peus pels camins de muntanya, contribuiran a deixar enrere els condicionaments,','Nos adentraremos mediante la apertura de los sentidos en el entorno natural, guiando hacia la conciencia plena y favoreciendo la conexión entre cuerpo y mente. El movimiento de los pies por los caminos de montaña contribuirá a dejar atrás los condicionamientos,'],
+              ['iniciant una conversa terapèutica','iniciando una conversación terapéutica'],
+              [', amb atenció holística. Podràs gaudir de primera mà de la connexió amb els arbres i de les olors de la varietat de plantes i flors, proporcionant la relaxació necessària per a poder reconnectar.',', con atención holística. Podrás disfrutar de primera mano de la conexión con los árboles y de los aromas de la variedad de plantas y flores, proporcionando la relajación necesaria para poder reconectar.'],
+              ['Trencar les rutines de les estructures quotidianes, mitjançant la','Romper las rutinas de las estructuras cotidianas mediante la'],
+              ['connexió amb el bosc','conexión con el bosque'],
+              [', proporcionarà la relaxació necessària per a poder-nos focalitzar en la ment rumiant.',', proporcionará la relajación necesaria para poder focalizarnos en la mente rumiativa.'],
+              ['S’exercitarà el sentiment de contacte','Se ejercitará la sensación de contacto'],
+              ['del cos amb la natura, de la ment amb el cos, de la ment amb la natura.','del cuerpo con la naturaleza, de la mente con el cuerpo y de la mente con la naturaleza.'],
+              ['Viure i abandonar moments complicats, possibilita un renéixer amb més força','Vivir y dejar atrás momentos complicados posibilita renacer con más fuerza'],
+              ['“La combinació única de teràpia tradicional i connexió amb la natura ha proporcionat un espai segur i revitalitzant per explorar i treballar en els meus reptes personals.”','“La combinación única de terapia tradicional y conexión con la naturaleza ha proporcionado un espacio seguro y revitalizante para explorar y trabajar en mis retos personales.”']
+            ]),
+            'es/contacto/index.html': new Map([
+              ['Contacta amb nosaltres','Contacta con nosotros'],
+              ['Em podeu contactar a:','Puedes contactarme en:'],
+              ['Correu electrònic','Correo electrónico'],
+              ['Telèfon','Teléfono'],
+              ['Envia un correu electrònic:','Envía un correo electrónico:'],
+              ['Nom','Nombre'],
+              ['Missatge','Mensaje'],
+              ['Consulta a Barcelona i Valldoreix:','Consulta en Barcelona y Valldoreix:']
+            ])
+          };
+
+          for (const [file, specific] of Object.entries(perFile)) {
+            let html = fs.readFileSync(file,'utf8');
+            for (const [from,to] of [...common,...specific]) html = html.split(from).join(to);
+            // Fix the language selector label while preserving the Catalan option in the dropdown.
+            html = html.replace(/(<a[^>]*class="menu-link"[^>]*>[^<]*(?:<[^>]+>)*[^<]*)Català([^<]*(?:<[^>]+>)*<\/a>)/, '$1Español$2');
+            fs.writeFileSync(file,html);
+            console.log(`Polished ${file}`);
+          }
+          EOF
+          node fix.mjs
+      - name: Commit Spanish copy polish
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add es
+          if git diff --cached --quiet; then
+            echo "No Spanish text changes"
+          else
+            git commit -m "Polish Spanish copy on exact Catalan layout"
+            git pull --rebase origin main
+            git push origin main
+          fi
