@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ca">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Floreix | Teràpia amb mirada sistèmica i arrelament natural</title>
+  <meta name="description" content="Floreix ofereix psicoteràpia, mindfulness i teràpia a la natura amb una mirada sistèmica i propera." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Libre+Baskerville:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink:#264334;
+      --muted:#6f7d73;
+      --cream:#f4efe5;
+      --sage:#dfe7de;
+      --leaf:#6a826d;
+      --line:#d8ddd5;
+      --white:#fff;
+      --max:1180px;
+      --radius:26px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;font-family:'DM Sans',sans-serif;color:var(--ink);background:#fff;line-height:1.6}
+    img{max-width:100%;display:block}
+    a{color:inherit;text-decoration:none}
+    .wrap{width:min(calc(100% - 40px),var(--max));margin:auto}
+    header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-bottom:1px solid rgba(216,221,213,.7)}
+    .nav{display:flex;align-items:center;justify-content:space-between;min-height:82px;gap:24px}
+    .brand{font-family:'Libre Baskerville',serif;font-size:30px;letter-spacing:.02em}
+    nav{display:flex;gap:28px;align-items:center;font-size:15px}
+    .drop{position:relative}
+    .drop>button,.lang button{background:none;border:0;font:inherit;color:inherit;padding:8px 0;cursor:pointer}
+    .menu{position:absolute;top:38px;left:-18px;min-width:220px;background:#fff;border:1px solid var(--line);padding:10px;border-radius:16px;box-shadow:0 20px 50px rgba(38,67,52,.12);display:none}
+    .drop:hover .menu,.drop:focus-within .menu{display:block}
+    .menu a{display:block;padding:10px 12px;border-radius:10px}
+    .menu a:hover{background:var(--sage)}
+    .cta{display:inline-flex;align-items:center;justify-content:center;background:var(--ink);color:#fff;padding:13px 21px;border-radius:999px;font-weight:600}
+    .lang{display:flex;gap:8px;align-items:center;font-size:14px}
+    .lang button.active{font-weight:700;text-decoration:underline;text-underline-offset:4px}
+    .hero{padding:70px 0 50px;background:linear-gradient(180deg,#fbfaf7 0%,#fff 100%)}
+    .hero-grid{display:grid;grid-template-columns:1.02fr .98fr;gap:48px;align-items:center}
+    .eyebrow{font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--leaf);font-weight:600}
+    h1,h2,h3{font-family:'Libre Baskerville',serif;font-weight:400;line-height:1.12;margin:0 0 18px}
+    h1{font-size:clamp(48px,6vw,78px)}
+    h2{font-size:clamp(34px,4vw,54px)}
+    h3{font-size:28px}
+    .hero p{font-size:20px;color:#506156;max-width:600px;margin:0 0 28px}
+    .hero-img{border-radius:36px;overflow:hidden;aspect-ratio:4/5;background:var(--sage)}
+    .hero-img img{width:100%;height:100%;object-fit:cover}
+    section{padding:88px 0}
+    .section-head{max-width:760px;margin-bottom:42px}
+    .services{background:var(--cream)}
+    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+    .card{background:#fff;border-radius:var(--radius);overflow:hidden;border:1px solid rgba(38,67,52,.08)}
+    .card img{width:100%;aspect-ratio:4/3;object-fit:cover}
+    .card-body{padding:26px}
+    .card p{color:#66756b;margin:0}
+    .about-grid{display:grid;grid-template-columns:.92fr 1.08fr;gap:54px;align-items:center}
+    .about-img{border-radius:34px;overflow:hidden}
+    .soft{background:var(--sage)}
+    .quote{font-family:'Libre Baskerville',serif;font-size:clamp(28px,4vw,44px);line-height:1.35;max-width:900px;margin:auto;text-align:center}
+    .quote small{display:block;font-family:'DM Sans',sans-serif;font-size:15px;margin-top:20px;color:var(--muted)}
+    .split{display:grid;grid-template-columns:1fr 1fr;gap:40px}
+    .panel{padding:36px;border-radius:26px;background:#fff;border:1px solid var(--line)}
+    .logos{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;align-items:center}
+    .logos img{max-height:80px;width:auto;margin:auto;object-fit:contain;filter:saturate(.85)}
+    .contact-box{background:var(--ink);color:#fff;border-radius:34px;padding:54px;display:grid;grid-template-columns:1.3fr .7fr;gap:30px;align-items:center}
+    .contact-box h2{color:#fff}
+    .contact-box p{color:#e6eee8;font-size:18px}
+    .contact-links{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+    .contact-links a{border-bottom:1px solid rgba(255,255,255,.5)}
+    footer{padding:40px 0;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
+    .foot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+    .mobile-toggle{display:none;background:none;border:1px solid var(--line);border-radius:12px;padding:9px 12px}
+    @media(max-width:900px){
+      nav{display:none;position:absolute;left:0;right:0;top:82px;background:#fff;padding:20px 24px;border-bottom:1px solid var(--line);flex-direction:column;align-items:flex-start}
+      nav.open{display:flex}.mobile-toggle{display:block}
+      .drop{width:100%}.menu{position:static;display:block;box-shadow:none;border:0;padding:4px 0 0 14px}
+      .hero-grid,.about-grid,.split,.contact-box{grid-template-columns:1fr}
+      .cards{grid-template-columns:1fr}
+      .logos{grid-template-columns:1fr 1fr}
+      .hero{padding-top:46px}
+    }
+    @media(max-width:560px){.wrap{width:min(calc(100% - 28px),var(--max))}.logos{grid-template-columns:1fr}.contact-box{padding:34px}.brand{font-size:26px}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="#inici" aria-label="Floreix">floreix</a>
+    <button class="mobile-toggle" id="mobileToggle" aria-expanded="false" aria-controls="mainNav">Menú</button>
+    <nav id="mainNav">
+      <a href="#inici" data-i18n="navHome">Inici</a>
+      <div class="drop"><button type="button" data-i18n="navServices">Serveis</button><div class="menu"><a href="#psicoterapia" data-i18n="navPsych">Psicoteràpia</a><a href="#natura" data-i18n="navNature">Teràpia a la natura i Mindfulness</a></div></div>
+      <div class="drop"><button type="button" data-i18n="navAbout">Sobre nosaltres</button><div class="menu"><a href="#sobre" data-i18n="navAbout2">Sobre nosaltres</a><a href="#metodologia" data-i18n="navMethod">Metodologia</a></div></div>
+      <div class="lang" aria-label="Selector d'idioma"><button id="caBtn" class="active">Català</button><span>/</span><button id="esBtn">Español</button></div>
+      <a class="cta" href="#contacte" data-i18n="navContact">Contactar</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="hero" id="inici">
+  <div class="wrap hero-grid">
+    <div><div class="eyebrow">Floreix</div><h1 data-i18n="heroTitle">Teràpia amb mirada sistèmica i arrelament natural</h1><h3 data-i18n="heroSub">Cos i ment en unió</h3><p data-i18n="heroText">Un espai d’acompanyament psicològic per comprendre’t, reconnectar i avançar amb més consciència.</p><a class="cta" href="#contacte" data-i18n="heroCta">Contacta</a></div>
+    <div class="hero-img"><img src="https://floreix.com/wp-content/uploads/2023/11/Terapia-a-la-natura-pagina-principal.webp" alt="Teràpia a la natura amb Floreix" /></div>
+  </div>
+</section>
+
+<section class="services" id="psicoterapia"><div class="wrap"><div class="section-head"><div class="eyebrow" data-i18n="servicesEyebrow">Serveis</div><h2 data-i18n="servicesTitle">Teràpia Relacional Sistèmica l Mindfulness l Natura</h2></div><div class="cards">
+  <article class="card"><img src="https://floreix.com/wp-content/uploads/2026/03/Psicoterapia-inici.webp" alt="Psicoteràpia" /><div class="card-body"><h3 data-i18n="psychTitle">Psicoteràpia</h3><p data-i18n="psychText">Un espai de comprensió</p></div></article>
+  <article class="card"><img src="https://floreix.com/wp-content/uploads/2026/03/Mindfulness-inici.webp" alt="Mindfulness" /><div class="card-body"><h3>Mindfulness</h3><p data-i18n="mindText">Cultivar l’atenció conscient</p></div></article>
+  <article class="card" id="natura"><img src="https://floreix.com/wp-content/uploads/2026/03/terapia-natura-inici.png" alt="Teràpia a la natura" /><div class="card-body"><h3 data-i18n="natureTitle">Teràpia a la natura</h3><p data-i18n="natureText">Reconnectar amb el ritme intern</p></div></article>
+</div></div></section>
+
+<section id="sobre"><div class="wrap about-grid"><div class="about-img"><img src="https://floreix.com/wp-content/uploads/elementor/thumbs/Sobre-nosaltres-scaled-qetuqs6e1qpq37r7j5eivsxowzbq5b4oadxb759sz4.jpg" alt="Maite Tacias, Floreix" /></div><div><div class="eyebrow" data-i18n="aboutEyebrow">Sobre nosaltres</div><h2>Maite Tacias</h2><p data-i18n="aboutText">Psicòloga en l’àmbit clínic, Màster en Teràpia Familiar i fundadora de Floreix. El projecte integra psicologia, mindfulness i connexió amb la natura per promoure benestar emocional i creixement personal.</p><a class="cta" href="#metodologia" data-i18n="aboutCta">Conèixer la metodologia</a></div></div></section>
+
+<section class="soft"><div class="wrap"><blockquote class="quote">“Altament recomanat per a tothom que busqui una experiència terapèutica enriquidora i genuïna.”<small>Clàudia R.</small></blockquote></div></section>
+
+<section id="metodologia"><div class="wrap"><div class="section-head"><div class="eyebrow" data-i18n="methodEyebrow">Metodologia</div><h2 data-i18n="methodTitle">Una mirada integradora i relacional</h2><p data-i18n="methodText">La metodologia combina psicoteràpia relacional sistèmica, pràctiques de mindfulness i, quan té sentit per a la persona, el contacte amb l’entorn natural.</p></div><div class="split"><div class="panel"><h3 data-i18n="missionTitle">Missió</h3><p data-i18n="missionText">Acompanyar processos de canvi des d’una mirada respectuosa, conscient i centrada en la persona i els seus vincles.</p></div><div class="panel"><h3 data-i18n="visionTitle">Visió</h3><p data-i18n="visionText">Entendre el benestar com una relació viva entre cos, ment, context i natura.</p></div></div></div></section>
+
+<section class="services"><div class="wrap"><div class="section-head"><div class="eyebrow" data-i18n="institutionsEyebrow">Formació i vinculació professional</div><h2 data-i18n="institutionsTitle">Entitats i institucions</h2></div><div class="logos"><img src="https://floreix.com/wp-content/uploads/2024/02/Captura-de-pantalla-2024-02-17-a-las-17.43.10-1024x301.png" alt="Col·legi Oficial de Psicologia de Catalunya" /><img src="https://floreix.com/wp-content/uploads/2024/02/UB-LOGO.png" alt="Universitat de Barcelona" /><img src="https://floreix.com/wp-content/uploads/2024/02/uoc_masterbrand_2linies_posititiu.jpg" alt="Universitat Oberta de Catalunya" /></div></div></section>
+
+<section id="contacte"><div class="wrap"><div class="contact-box"><div><div class="eyebrow" style="color:#b7cab9" data-i18n="contactEyebrow">Contacte</div><h2 data-i18n="contactTitle">Vols més informació o reservar una primera sessió?</h2><p data-i18n="contactText">Escriu o truca i parlem del que necessites.</p></div><div class="contact-links"><a href="mailto:maite@floreix.com">maite@floreix.com</a><a href="tel:+34689056569">689 056 569</a><a href="https://www.instagram.com/floreix" target="_blank" rel="noreferrer">Instagram · @floreix</a></div></div></div></section>
+</main>
+
+<footer><div class="wrap foot"><span>© Floreix</span><a href="https://floreix.com/privacy-policy/" data-i18n="legal">Termes i Condicions</a></div></footer>
+<script>
+const dict={ca:{navHome:'Inici',navServices:'Serveis',navPsych:'Psicoteràpia',navNature:'Teràpia a la natura i Mindfulness',navAbout:'Sobre nosaltres',navAbout2:'Sobre nosaltres',navMethod:'Metodologia',navContact:'Contactar',heroTitle:'Teràpia amb mirada sistèmica i arrelament natural',heroSub:'Cos i ment en unió',heroText:'Un espai d’acompanyament psicològic per comprendre’t, reconnectar i avançar amb més consciència.',heroCta:'Contacta',servicesEyebrow:'Serveis',servicesTitle:'Teràpia Relacional Sistèmica l Mindfulness l Natura',psychTitle:'Psicoteràpia',psychText:'Un espai de comprensió',mindText:'Cultivar l’atenció conscient',natureTitle:'Teràpia a la natura',natureText:'Reconnectar amb el ritme intern',aboutEyebrow:'Sobre nosaltres',aboutText:'Psicòloga en l’àmbit clínic, Màster en Teràpia Familiar i fundadora de Floreix. El projecte integra psicologia, mindfulness i connexió amb la natura per promoure benestar emocional i creixement personal.',aboutCta:'Conèixer la metodologia',methodEyebrow:'Metodologia',methodTitle:'Una mirada integradora i relacional',methodText:'La metodologia combina psicoteràpia relacional sistèmica, pràctiques de mindfulness i, quan té sentit per a la persona, el contacte amb l’entorn natural.',missionTitle:'Missió',missionText:'Acompanyar processos de canvi des d’una mirada respectuosa, conscient i centrada en la persona i els seus vincles.',visionTitle:'Visió',visionText:'Entendre el benestar com una relació viva entre cos, ment, context i natura.',institutionsEyebrow:'Formació i vinculació professional',institutionsTitle:'Entitats i institucions',contactEyebrow:'Contacte',contactTitle:'Vols més informació o reservar una primera sessió?',contactText:'Escriu o truca i parlem del que necessites.',legal:'Termes i Condicions'},es:{navHome:'Inicio',navServices:'Servicios',navPsych:'Psicoterapia',navNature:'Terapia en la naturaleza y Mindfulness',navAbout:'Sobre nosotros',navAbout2:'Sobre nosotros',navMethod:'Metodología',navContact:'Contactar',heroTitle:'Terapia con mirada sistémica y arraigo natural',heroSub:'Cuerpo y mente en unión',heroText:'Un espacio de acompañamiento psicológico para comprenderte, reconectar y avanzar con mayor conciencia.',heroCta:'Contacta',servicesEyebrow:'Servicios',servicesTitle:'Terapia Relacional Sistémica l Mindfulness l Naturaleza',psychTitle:'Psicoterapia',psychText:'Un espacio de comprensión',mindText:'Cultivar la atención consciente',natureTitle:'Terapia en la naturaleza',natureText:'Reconectar con el ritmo interno',aboutEyebrow:'Sobre nosotros',aboutText:'Psicóloga en el ámbito clínico, Máster en Terapia Familiar y fundadora de Floreix. El proyecto integra psicología, mindfulness y conexión con la naturaleza para promover bienestar emocional y crecimiento personal.',aboutCta:'Conocer la metodología',methodEyebrow:'Metodología',methodTitle:'Una mirada integradora y relacional',methodText:'La metodología combina psicoterapia relacional sistémica, prácticas de mindfulness y, cuando tiene sentido para la persona, el contacto con el entorno natural.',missionTitle:'Misión',missionText:'Acompañar procesos de cambio desde una mirada respetuosa, consciente y centrada en la persona y sus vínculos.',visionTitle:'Visión',visionText:'Entender el bienestar como una relación viva entre cuerpo, mente, contexto y naturaleza.',institutionsEyebrow:'Formación y vinculación profesional',institutionsTitle:'Entidades e instituciones',contactEyebrow:'Contacto',contactTitle:'¿Quieres más información o reservar una primera sesión?',contactText:'Escribe o llama y hablamos de lo que necesitas.',legal:'Términos y Condiciones'}};
+function setLang(lang){document.documentElement.lang=lang;document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.dataset.i18n;if(dict[lang][k])el.textContent=dict[lang][k]});caBtn.classList.toggle('active',lang==='ca');esBtn.classList.toggle('active',lang==='es');localStorage.setItem('floreix-lang',lang)}
+caBtn.onclick=()=>setLang('ca');esBtn.onclick=()=>setLang('es');mobileToggle.onclick=()=>{const open=mainNav.classList.toggle('open');mobileToggle.setAttribute('aria-expanded',open)};setLang(localStorage.getItem('floreix-lang')||'ca');
+</script>
+</body></html>
