@@ -1,11 +1,15 @@
 (() => {
-  if (!document.querySelector('link[data-floreix-typography]')) {
-    const typography = document.createElement('link');
-    typography.rel = 'stylesheet';
-    typography.href = '/assets/typography.css';
-    typography.dataset.floreixTypography = 'true';
-    document.head.appendChild(typography);
-  }
+  const ensureStylesheet = (href, marker) => {
+    if (document.querySelector(`link[${marker}]`)) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    link.setAttribute(marker, 'true');
+    document.head.appendChild(link);
+  };
+
+  ensureStylesheet('/assets/typography.css', 'data-floreix-typography');
+  ensureStylesheet('/assets/brand.css', 'data-floreix-brand');
 
   const toggle = document.querySelector('[data-menu-toggle]');
   const nav = document.querySelector('[data-main-nav]');
