@@ -30,32 +30,41 @@ jobs:
           fs.mkdirSync('reference', {recursive:true});
           const targets = [
             ['home','https://floreix.com/'],
-            ['about','https://floreix.com/about/']
+            ['psicoterapia','https://floreix.com/psicoterapia/'],
+            ['terapia-a-la-natura','https://floreix.com/terapia-a-la-natura/'],
+            ['about','https://floreix.com/about/'],
+            ['metodologia','https://floreix.com/metodologia/'],
+            ['contact','https://floreix.com/contact/'],
+            ['privacy-policy','https://floreix.com/privacy-policy/']
           ];
+          const report = {};
           for (const [name,url] of targets) {
-            for (const [mode,width,height] of [['desktop',1440,1000],['mobile',390,844]]) {
-              const page = await browser.newPage({viewport:{width,height}});
-              await page.goto(url,{waitUntil:'networkidle',timeout:120000});
-              await page.screenshot({path:`reference/${name}-${mode}.png`,fullPage:true});
-              if (name === 'home' && mode === 'desktop') {
-                fs.writeFileSync('reference/home.html', await page.content());
-                const meta = await page.evaluate(() => ({
-                  bodyFont:getComputedStyle(document.body).fontFamily,
-                  bodyColor:getComputedStyle(document.body).color,
-                  bodyBackground:getComputedStyle(document.body).backgroundColor,
-                  viewport:{w:innerWidth,h:innerHeight},
-                  headings:[...document.querySelectorAll('h1,h2,h3,h4')].slice(0,20).map(el=>({tag:el.tagName,text:el.textContent.trim(),font:getComputedStyle(el).fontFamily,size:getComputedStyle(el).fontSize,weight:getComputedStyle(el).fontWeight,lineHeight:getComputedStyle(el).lineHeight,color:getComputedStyle(el).color,letterSpacing:getComputedStyle(el).letterSpacing,rect:el.getBoundingClientRect().toJSON()})),
-                  header:document.querySelector('header') ? (()=>{const e=document.querySelector('header'),s=getComputedStyle(e);return {rect:e.getBoundingClientRect().toJSON(),position:s.position,color:s.color,background:s.backgroundColor}})() : null
-                }));
-                fs.writeFileSync('reference/metrics.json', JSON.stringify(meta,null,2));
-              }
-              await page.close();
-            }
+            const page = await browser.newPage({viewport:{width:1440,height:1000}});
+            await page.goto(url,{waitUntil:'networkidle',timeout:120000});
+            await page.screenshot({path:`reference/${name}-desktop.png`,fullPage:true});
+            fs.writeFileSync(`reference/${name}.html`, await page.content());
+            report[name] = await page.evaluate(() => ({
+              title: document.title,
+              url: location.href,
+              bodyFont:getComputedStyle(document.body).fontFamily,
+              bodyColor:getComputedStyle(document.body).color,
+              bodyBackground:getComputedStyle(document.body).backgroundColor,
+              h1:[...document.querySelectorAll('h1')].map(el=>({text:el.textContent.trim(),font:getComputedStyle(el).fontFamily,size:getComputedStyle(el).fontSize,weight:getComputedStyle(el).fontWeight,lineHeight:getComputedStyle(el).lineHeight,color:getComputedStyle(el).color,letterSpacing:getComputedStyle(el).letterSpacing,rect:el.getBoundingClientRect().toJSON()})),
+              images:[...document.images].map(img=>({src:img.currentSrc||img.src,alt:img.alt,width:img.getBoundingClientRect().width,height:img.getBoundingClientRect().height})).filter(x=>x.src && !x.src.startsWith('data:'))
+            }));
+            await page.close();
           }
+          for (const [name,url] of [['home','https://floreix.com/'],['about','https://floreix.com/about/']]) {
+            const page = await browser.newPage({viewport:{width:390,height:844}});
+            await page.goto(url,{waitUntil:'networkidle',timeout:120000});
+            await page.screenshot({path:`reference/${name}-mobile.png`,fullPage:true});
+            await page.close();
+          }
+          fs.writeFileSync('reference/report.json', JSON.stringify(report,null,2));
           await browser.close();
           EOF
           node capture.mjs
       - uses: actions/upload-artifact@v4
         with:
-          name: floreix-reference
+          name: floreix-reference-all
           path: reference/
