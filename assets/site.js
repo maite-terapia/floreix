@@ -28,4 +28,12 @@
   document.querySelectorAll('[data-lang-target]').forEach(link => {
     link.addEventListener('click', () => localStorage.setItem('floreix-lang', link.dataset.lang));
   });
+
+  const path = location.pathname.replace(/\/index\.html$/, '/');
+  if (document.documentElement.lang === 'ca' && (path === '/' || path === '') && !document.querySelector('script[data-floreix-live]')) {
+    const live = document.createElement('script');
+    live.src = '/assets/live-page.js';
+    live.dataset.floreixLive = 'true';
+    document.body.appendChild(live);
+  }
 })();
