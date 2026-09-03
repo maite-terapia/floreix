@@ -1,7 +1,13 @@
 (() => {
-  const mount = document.querySelector('[data-live-page]');
-  if (!mount) return;
-  const key = mount.dataset.livePage;
+  let mount = document.querySelector('[data-live-page]');
+  let key = mount?.dataset.livePage || null;
+  const path = location.pathname.replace(/\/index\.html$/, '/');
+  if (!mount && document.documentElement.lang === 'ca' && (path === '/' || path === '')) {
+    mount = document.querySelector('main');
+    key = '__home__';
+  }
+  if (!mount || !key) return;
+
   const fields = '_fields=id,title,content,link';
   const endpoint = key === '__home__'
     ? `https://floreix.com/wp-json/wp/v2/pages?per_page=100&${fields}`
@@ -31,15 +37,12 @@
     .then(pages => {
       const page = pickPage(pages);
       if (!page?.content?.rendered?.trim()) return;
-
       addCss('https://floreix.com/wp-includes/css/dist/block-library/style.min.css');
       addCss('https://floreix.com/wp-content/themes/astra/assets/css/minified/main.min.css');
       addCss('https://floreix.com/wp-content/plugins/elementor/assets/css/frontend.min.css');
       addCss(`https://floreix.com/wp-content/uploads/elementor/css/post-${page.id}.css`);
-
       mount.innerHTML = page.content.rendered;
       mount.dataset.liveLoaded = 'true';
-
       mount.querySelectorAll('a[href^="https://floreix.com"]').forEach(a => {
         try {
           const u = new URL(a.href);
@@ -47,8 +50,5 @@
         } catch (_) {}
       });
     })
-    .catch(() => {
-      // Keep the verified static fallback when the public WordPress API cannot
-      // be reached by the visitor's browser.
-    });
+    .catch(() => {});
 })();
